@@ -77,7 +77,7 @@ if ($hassiteconfig) {
         $version = [];
         exec('HOME=/tmp DBUS_SESSION_BUS_ADDRESS= ' . escapeshellcmd($lopath) . ' --version 2>&1', $version);
         // Filter out dconf/GLib warnings from version output.
-        $version = array_filter($version, function($line) {
+        $version = array_filter($version, function ($line) {
             return stripos($line, 'dconf') === false && stripos($line, 'GLib') === false;
         });
         $versionstr = !empty($version) ? implode(' ', $version) : 'unknown version';

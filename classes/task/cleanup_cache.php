@@ -24,17 +24,22 @@
 
 namespace local_docviewer\task;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Deletes cached PDFs older than the configured maximum age.
  */
 class cleanup_cache extends \core\task\scheduled_task {
-
+    /**
+     * Get the name of this scheduled task.
+     *
+     * @return string The task name.
+     */
     public function get_name(): string {
         return get_string('cache_cleanup', 'local_docviewer');
     }
 
+    /**
+     * Execute the cleanup task.
+     */
     public function execute(): void {
         global $CFG;
 

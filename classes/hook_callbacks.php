@@ -27,15 +27,14 @@ namespace local_docviewer;
 use core\hook\output\before_footer_html_generation;
 use core\hook\output\before_standard_top_of_body_html_generation;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Hook callbacks that intercept resource pages and inject the viewer JS.
  */
 class hook_callbacks {
-
     /**
      * Get the list of supported file extensions.
+     *
+     * @return array List of supported extensions.
      */
     private static function get_supported_extensions(): array {
         $formats = get_config('local_docviewer', 'supportedformats') ?:
@@ -45,6 +44,9 @@ class hook_callbacks {
 
     /**
      * Check if preview is excluded for a given course module.
+     *
+     * @param int $cmid The course module ID.
+     * @return bool True if excluded.
      */
     private static function is_excluded(int $cmid): bool {
         global $DB;
@@ -53,6 +55,8 @@ class hook_callbacks {
 
     /**
      * On mod_resource view pages, redirect to our viewer immediately.
+     *
+     * @param before_standard_top_of_body_html_generation $hook The hook instance.
      */
     public static function before_standard_top_of_body(before_standard_top_of_body_html_generation $hook): void {
         global $PAGE, $CFG;
@@ -87,8 +91,14 @@ class hook_callbacks {
         $supported = self::get_supported_extensions();
         $ctx = \context_module::instance($PAGE->cm->id);
         $fs = get_file_storage();
-        $files = $fs->get_area_files($ctx->id, 'mod_resource', 'content', 0,
-                                     'sortorder DESC, id ASC', false);
+        $files = $fs->get_area_files(
+            $ctx->id,
+            'mod_resource',
+            'content',
+            0,
+            'sortorder DESC, id ASC',
+            false
+        );
         if (!$files) {
             return;
         }
@@ -101,8 +111,12 @@ class hook_callbacks {
         }
 
         $fileurl = \moodle_url::make_pluginfile_url(
-            $ctx->id, 'mod_resource', 'content', 0,
-            $file->get_filepath(), $file->get_filename()
+            $ctx->id,
+            'mod_resource',
+            'content',
+            0,
+            $file->get_filepath(),
+            $file->get_filename()
         );
         $rawfileurl = $fileurl->out(false);
         $url = (new \moodle_url('/local/docviewer/view.php'))->out(false)
@@ -112,6 +126,8 @@ class hook_callbacks {
 
     /**
      * Inject the Document Viewer JS interceptor before the page footer.
+     *
+     * @param before_footer_html_generation $hook The hook instance.
      */
     public static function before_footer_html_generation(before_footer_html_generation $hook): void {
         global $PAGE, $CFG, $DB;
@@ -131,13 +147,14 @@ class hook_callbacks {
         $PAGE->requires->js_call_amd('local_docviewer/interceptor', 'init', [[
             'extensions' => $supported,
             'viewerurl'  => $viewerurl->out(false),
-            'wwwroot'    => $CFG->wwwroot,
         ]]);
 
         // On course pages, also provide resource data for event delegation.
-        if (strpos($PAGE->pagetype, 'course-view-') === 0
-                && !empty($PAGE->course->id)
-                && $PAGE->course->id != SITEID) {
+        if (
+            strpos($PAGE->pagetype, 'course-view-') === 0
+            && !empty($PAGE->course->id)
+            && $PAGE->course->id != SITEID
+        ) {
             try {
                 $modinfo = get_fast_modinfo($PAGE->course);
                 $resourcedata = [];
@@ -149,9 +166,11 @@ class hook_callbacks {
                     $allcmids[] = (int) $cminfo->id;
                 }
                 if (!empty($allcmids)) {
-                    list($insql, $inparams) = $DB->get_in_or_equal($allcmids);
+                    [$insql, $inparams] = $DB->get_in_or_equal($allcmids);
                     $excludedrecords = $DB->get_records_select(
-                        'local_docviewer_exclude', "cmid $insql", $inparams
+                        'local_docviewer_exclude',
+                        "cmid $insql",
+                        $inparams
                     );
                     foreach ($excludedrecords as $rec) {
                         $excludedcmids[$rec->cmid] = true;
@@ -175,8 +194,12 @@ class hook_callbacks {
                     $ctx = \context_module::instance($cminfo->id);
                     $fs = get_file_storage();
                     $files = $fs->get_area_files(
-                        $ctx->id, 'mod_resource', 'content', 0,
-                        'sortorder DESC, id ASC', false
+                        $ctx->id,
+                        'mod_resource',
+                        'content',
+                        0,
+                        'sortorder DESC, id ASC',
+                        false
                     );
                     if (!$files) {
                         continue;
@@ -187,8 +210,12 @@ class hook_callbacks {
 
                     if (in_array($ext, $supported)) {
                         $fileurl = \moodle_url::make_pluginfile_url(
-                            $ctx->id, 'mod_resource', 'content', 0,
-                            $mainfile->get_filepath(), $mainfile->get_filename()
+                            $ctx->id,
+                            'mod_resource',
+                            'content',
+                            0,
+                            $mainfile->get_filepath(),
+                            $mainfile->get_filename()
                         );
                         $resourcedata[] = [
                             'cmid'     => (int) $cminfo->id,
@@ -212,7 +239,9 @@ class hook_callbacks {
                     $nodownloadcmids = [];
                     if (!empty($allcmids)) {
                         $ndrecords = $DB->get_records_select(
-                            'local_docviewer_nodownload', "cmid $insql", $inparams
+                            'local_docviewer_nodownload',
+                            "cmid $insql",
+                            $inparams
                         );
                         foreach ($ndrecords as $rec) {
                             $nodownloadcmids[$rec->cmid] = true;
@@ -227,8 +256,12 @@ class hook_callbacks {
                         $ctx = \context_module::instance($cminfo->id);
                         $fs = get_file_storage();
                         $files = $fs->get_area_files(
-                            $ctx->id, 'mod_resource', 'content', 0,
-                            'sortorder DESC, id ASC', false
+                            $ctx->id,
+                            'mod_resource',
+                            'content',
+                            0,
+                            'sortorder DESC, id ASC',
+                            false
                         );
                         if (!$files) {
                             continue;
@@ -246,8 +279,6 @@ class hook_callbacks {
                     if (!empty($toggledata)) {
                         $PAGE->requires->js_call_amd('local_docviewer/interceptor', 'initToggles', [[
                             'toggles' => $toggledata,
-                            'toggleurl' => (new \moodle_url('/local/docviewer/toggle.php'))->out(false),
-                            'sesskey' => sesskey(),
                             'enableLabel' => get_string('enable_for_resource', 'local_docviewer'),
                             'disableLabel' => get_string('disable_for_resource', 'local_docviewer'),
                             'showDownloadLabel' => get_string('show_download', 'local_docviewer'),

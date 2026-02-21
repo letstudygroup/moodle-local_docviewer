@@ -24,24 +24,24 @@
 
 namespace local_docviewer;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Converts office documents to PDF using LibreOffice in headless mode.
  *
  * Converted files are cached by content hash to avoid repeated conversions.
  */
 class converter {
-
     /** @var string Path to LibreOffice binary. */
-    private string $libreoffice_path;
+    private string $lopath;
 
     /** @var string Path to cache directory. */
     private string $cachedir;
 
+    /**
+     * Constructor.
+     */
     public function __construct() {
         global $CFG;
-        $this->libreoffice_path = get_config('local_docviewer', 'libreoffice_path') ?: '/usr/bin/libreoffice';
+        $this->lopath = get_config('local_docviewer', 'libreoffice_path') ?: '/usr/bin/libreoffice';
         $this->cachedir = $CFG->dataroot . '/docviewer';
 
         if (!is_dir($this->cachedir)) {
@@ -51,13 +51,18 @@ class converter {
 
     /**
      * Check if LibreOffice is available for conversion.
+     *
+     * @return bool True if LibreOffice is available.
      */
     public function is_available(): bool {
-        return file_exists($this->libreoffice_path) && is_executable($this->libreoffice_path);
+        return file_exists($this->lopath) && is_executable($this->lopath);
     }
 
     /**
      * Get cached PDF path for a given content hash.
+     *
+     * @param string $contenthash The content hash of the original file.
+     * @return string|null Path to the cached PDF, or null if not cached.
      */
     public function get_cached_pdf(string $contenthash): ?string {
         $pdfpath = $this->cachedir . '/' . $contenthash . '.pdf';
@@ -105,7 +110,7 @@ class converter {
         $cmd = 'cd ' . escapeshellarg($tempdir) .
                ' && HOME=' . escapeshellarg($tempdir) .
                ' timeout 120 ' .
-               escapeshellcmd($this->libreoffice_path) .
+               escapeshellcmd($this->lopath) .
                ' --headless --norestore --nofirststartwizard' .
                ' "-env:UserInstallation=file://' . $profiledir . '"' .
                ' --convert-to pdf' .
@@ -138,6 +143,8 @@ class converter {
 
     /**
      * Recursively remove a temporary directory.
+     *
+     * @param string $dir The directory to remove.
      */
     private function cleanup_temp(string $dir): void {
         if (!is_dir($dir)) {

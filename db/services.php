@@ -15,27 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy API implementation for local_docviewer.
+ * External services definitions for local_docviewer.
  *
  * @package    local_docviewer
  * @copyright  2026 Overpass Connect
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_docviewer\privacy;
+defined('MOODLE_INTERNAL') || die();
 
-use core_privacy\local\metadata\null_provider;
-
-/**
- * Privacy provider — this plugin does not store any personal data.
- */
-class provider implements null_provider {
-    /**
-     * Get the reason why no user data is stored.
-     *
-     * @return string The language string key.
-     */
-    public static function get_reason(): string {
-        return 'privacy:metadata';
-    }
-}
+$functions = [
+    'local_docviewer_toggle_setting' => [
+        'classname'    => 'local_docviewer\external\toggle_setting',
+        'description'  => 'Toggle preview or download setting for a resource.',
+        'type'         => 'write',
+        'ajax'         => true,
+        'capabilities' => 'moodle/course:manageactivities',
+    ],
+];

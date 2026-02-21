@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026021205;
-$plugin->requires  = 2024100700; // Moodle 4.5+
+$plugin->version   = 2026022100;
+$plugin->requires  = 2024100700; // Moodle 4.5+.
 $plugin->supported = [405, 500]; // Moodle 4.5 to 5.0.
 $plugin->component = 'local_docviewer';
 $plugin->maturity  = MATURITY_STABLE;

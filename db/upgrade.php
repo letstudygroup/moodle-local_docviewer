@@ -22,8 +22,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Upgrade steps for local_docviewer.
+ *
+ * @param int $oldversion The old version of the plugin.
+ * @return bool
+ */
 function xmldb_local_docviewer_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();

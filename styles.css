@@ -17,24 +17,27 @@
     background: #fff;
 }
 
-/* In embedded layout, remove all Moodle chrome to maximize viewer space. */
-body.pagelayout-embedded .docviewer-container {
+/* In docviewer embedded layout, remove Moodle chrome to maximize viewer space. */
+body.local-docviewer .docviewer-container {
     height: 100vh;
 }
-body.pagelayout-embedded #page,
-body.pagelayout-embedded #page-wrapper,
-body.pagelayout-embedded #page-content,
-body.pagelayout-embedded [role="main"],
-body.pagelayout-embedded #region-main,
-body.pagelayout-embedded #maincontent {
+body.local-docviewer #page,
+body.local-docviewer #page-wrapper,
+body.local-docviewer #page-content,
+body.local-docviewer [role="main"],
+body.local-docviewer #region-main,
+body.local-docviewer #maincontent {
+    /* stylelint-disable declaration-no-important */
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
+    /* stylelint-enable declaration-no-important */
 }
-body.pagelayout-embedded #page-header,
-body.pagelayout-embedded #page-footer,
-body.pagelayout-embedded .page-header-headings,
-body.pagelayout-embedded nav.navbar {
+body.local-docviewer #page-header,
+body.local-docviewer #page-footer,
+body.local-docviewer .page-header-headings,
+body.local-docviewer nav.navbar {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
@@ -80,9 +83,11 @@ body.pagelayout-embedded nav.navbar {
 /* Toggle button styling */
 .docviewer-toggle {
     display: inline-block;
+    /* stylelint-disable-next-line declaration-no-important */
     text-decoration: none !important;
 }
 .docviewer-toggle:hover {
+    /* stylelint-disable-next-line declaration-no-important */
     opacity: 1 !important;
 }
 

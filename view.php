@@ -26,7 +26,7 @@ require_once(__DIR__ . '/../../config.php');
 
 $fileurl = required_param('fileurl', PARAM_URL);
 $action  = optional_param('action', 'view', PARAM_ALPHA);
-$cmid_param = optional_param('cmid', 0, PARAM_INT);
+$cmidparam = optional_param('cmid', 0, PARAM_INT);
 
 require_login();
 
@@ -161,6 +161,7 @@ if ($action === 'servepdf') {
 $PAGE->set_url(new \moodle_url('/local/docviewer/view.php', ['fileurl' => $fileurl]));
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('embedded');
+$PAGE->add_body_class('local-docviewer');
 $PAGE->set_title(get_string('viewer', 'local_docviewer') . ': ' . $filename);
 
 $pdfurl = new \moodle_url('/local/docviewer/view.php', [
@@ -168,75 +169,30 @@ $pdfurl = new \moodle_url('/local/docviewer/view.php', [
     'action'  => 'servepdf',
 ]);
 
+$PAGE->requires->js_call_amd('local_docviewer/viewer', 'init', [[
+    'pdfurl' => $pdfurl->out(false),
+    'errormessage' => get_string('conversionfailed', 'local_docviewer'),
+]]);
+
 // Check if download button should be hidden for this resource.
 $hidedownload = false;
-if ($cmid_param > 0) {
-    $hidedownload = $DB->record_exists('local_docviewer_nodownload', ['cmid' => $cmid_param]);
+if ($cmidparam > 0) {
+    $hidedownload = $DB->record_exists('local_docviewer_nodownload', ['cmid' => $cmidparam]);
 } else if ($context->contextlevel == CONTEXT_MODULE) {
     // Try to find cmid from context.
     $hidedownload = $DB->record_exists('local_docviewer_nodownload', ['cmid' => $context->instanceid]);
 }
 
-echo $OUTPUT->header();
-?>
-<div class="docviewer-container">
-    <div class="docviewer-toolbar">
-        <span class="docviewer-filename" title="<?php echo s($filename); ?>">
-            <i class="fa fa-file-text"></i>
-            <?php echo s($filename); ?>
-        </span>
-        <div class="docviewer-actions">
-            <?php if (!$hidedownload): ?>
-            <a href="<?php echo s($fileurl); ?>" class="btn btn-primary btn-sm docviewer-download" download>
-                <i class="fa fa-download"></i>
-                <?php echo get_string('download_original', 'local_docviewer'); ?>
-                (<?php echo strtoupper($ext); ?>)
-            </a>
-            <?php endif; ?>
-            <a href="javascript:history.back()" class="btn btn-secondary btn-sm">
-                <i class="fa fa-arrow-left"></i>
-                <?php echo get_string('back', 'local_docviewer'); ?>
-            </a>
-        </div>
-    </div>
-    <div class="docviewer-frame" id="docviewer-frame">
-        <div class="docviewer-loading" id="docviewer-loading">
-            <div class="spinner-border text-primary" role="status"></div>
-            <span><?php echo get_string('converting', 'local_docviewer'); ?></span>
-        </div>
-        <iframe id="docviewer-iframe"
-                style="display:none;"
-                allowfullscreen></iframe>
-    </div>
-</div>
-<script>
-(function() {
-    var pdfUrl = <?php echo json_encode($pdfurl->out(false)); ?>;
-    var iframe = document.getElementById('docviewer-iframe');
-    var loading = document.getElementById('docviewer-loading');
+$templatecontext = [
+    'filename' => $filename,
+    'fileurl' => $fileurl,
+    'ext' => strtoupper($ext),
+    'showdownload' => !$hidedownload,
+    'str_download_original' => get_string('download_original', 'local_docviewer'),
+    'str_back' => get_string('back', 'local_docviewer'),
+    'str_converting' => get_string('converting', 'local_docviewer'),
+];
 
-    fetch(pdfUrl, {credentials: 'same-origin'})
-        .then(function(response) {
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            return response.blob();
-        })
-        .then(function(blob) {
-            // #toolbar=0 hides Chrome/Edge PDF toolbar (download, print).
-            // For Firefox PDF.js, we inject CSS after load.
-            var blobUrl = URL.createObjectURL(blob) + '#toolbar=0&navpanes=0';
-            iframe.src = blobUrl;
-            iframe.addEventListener('load', function() {
-                loading.style.display = 'none';
-                iframe.style.display = 'block';
-            });
-        })
-        .catch(function(err) {
-            loading.innerHTML = '<div class="alert alert-danger">' +
-                '<i class="fa fa-exclamation-triangle"></i> ' +
-                '<?php echo addslashes_js(get_string('conversionfailed', 'local_docviewer')); ?>' +
-                '</div>';
-        });
-})();
-</script>
-<?php
+echo $OUTPUT->header();
+echo $OUTPUT->render_from_template('local_docviewer/viewer', $templatecontext);
 echo $OUTPUT->footer();

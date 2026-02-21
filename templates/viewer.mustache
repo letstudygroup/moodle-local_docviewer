@@ -1,0 +1,71 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_docviewer/viewer
+
+    Document viewer page template.
+
+    Context variables required for this template:
+    * filename - The name of the file being viewed.
+    * fileurl - The download URL for the original file.
+    * ext - The uppercase file extension.
+    * showdownload - Whether to show the download button.
+    * str_download_original - Localized string for download button.
+    * str_back - Localized string for back button.
+    * str_converting - Localized string for loading message.
+
+    Example context (json):
+    {
+        "filename": "document.docx",
+        "fileurl": "https://example.com/pluginfile.php/1/mod_resource/content/0/document.docx",
+        "ext": "DOCX",
+        "showdownload": true,
+        "str_download_original": "Download original",
+        "str_back": "Back",
+        "str_converting": "Converting document..."
+    }
+}}
+<div class="docviewer-container">
+    <div class="docviewer-toolbar">
+        <span class="docviewer-filename" title="{{filename}}">
+            <i class="fa fa-file-text"></i>
+            {{filename}}
+        </span>
+        <div class="docviewer-actions">
+            {{#showdownload}}
+            <a href="{{fileurl}}" class="btn btn-primary btn-sm docviewer-download" download>
+                <i class="fa fa-download"></i>
+                {{str_download_original}}
+                ({{ext}})
+            </a>
+            {{/showdownload}}
+            <a href="javascript:history.back()" class="btn btn-secondary btn-sm">
+                <i class="fa fa-arrow-left"></i>
+                {{str_back}}
+            </a>
+        </div>
+    </div>
+    <div class="docviewer-frame" id="docviewer-frame">
+        <div class="docviewer-loading" id="docviewer-loading">
+            <div class="spinner-border text-primary" role="status"></div>
+            <span>{{str_converting}}</span>
+        </div>
+        <iframe id="docviewer-iframe"
+                style="display:none;"
+                allowfullscreen></iframe>
+    </div>
+</div>
