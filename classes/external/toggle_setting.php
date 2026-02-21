@@ -33,7 +33,6 @@ use core_external\external_value;
  * Toggle preview or download setting for a course module resource.
  */
 class toggle_setting extends external_api {
-
     /**
      * Describes the parameters for the external function.
      *
