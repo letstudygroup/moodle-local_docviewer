@@ -37,28 +37,41 @@ define([], function() {
             const iframe = document.getElementById('docviewer-iframe');
             const loading = document.getElementById('docviewer-loading');
 
-            fetch(pdfUrl, {credentials: 'same-origin'})
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status);
-                    }
-                    return response.blob();
-                })
-                .then(function(blob) {
-                    // #toolbar=0 hides Chrome/Edge PDF toolbar (download, print).
-                    const blobUrl = URL.createObjectURL(blob) + '#toolbar=0&navpanes=0';
-                    iframe.src = blobUrl;
-                    iframe.addEventListener('load', function() {
-                        loading.style.display = 'none';
-                        iframe.style.display = 'block';
+            // In Moodle App / webview environments, blob URLs may not work.
+            // Fall back to loading the PDF URL directly in the iframe.
+            const useBlobUrl = !/MoodleMobile/i.test(navigator.userAgent);
+
+            if (useBlobUrl) {
+                fetch(pdfUrl, {credentials: 'same-origin'})
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.blob();
+                    })
+                    .then(function(blob) {
+                        // #toolbar=0 hides Chrome/Edge PDF toolbar (download, print).
+                        var blobUrl = URL.createObjectURL(blob) + '#toolbar=0&navpanes=0';
+                        iframe.src = blobUrl;
+                        iframe.addEventListener('load', function() {
+                            loading.style.display = 'none';
+                            iframe.style.display = 'block';
+                        });
+                    })
+                    .catch(function() {
+                        loading.innerHTML = '<div class="alert alert-danger">' +
+                            '<i class="fa fa-exclamation-triangle"></i> ' +
+                            errorMessage +
+                            '</div>';
                     });
-                })
-                .catch(function() {
-                    loading.innerHTML = '<div class="alert alert-danger">' +
-                        '<i class="fa fa-exclamation-triangle"></i> ' +
-                        errorMessage +
-                        '</div>';
+            } else {
+                // Direct iframe load for Moodle App compatibility.
+                iframe.src = pdfUrl;
+                iframe.addEventListener('load', function() {
+                    loading.style.display = 'none';
+                    iframe.style.display = 'block';
                 });
+            }
         }
     };
 });

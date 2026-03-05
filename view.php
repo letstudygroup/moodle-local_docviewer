@@ -111,6 +111,16 @@ if (!$file || $file->is_directory()) {
 
 $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
+// Action: force-download the original file (works reliably in webviews / Moodle App).
+if ($action === 'download') {
+    \core\session\manager::write_close();
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+    send_stored_file($file, 0, 0, true);
+    die;
+}
+
 // Action: serve the converted PDF directly.
 if ($action === 'servepdf') {
     // If already a PDF, serve directly.
@@ -183,9 +193,14 @@ if ($cmidparam > 0) {
     $hidedownload = $DB->record_exists('local_docviewer_nodownload', ['cmid' => $context->instanceid]);
 }
 
+$downloadurl = new \moodle_url('/local/docviewer/view.php', [
+    'fileurl' => $fileurl,
+    'action'  => 'download',
+]);
+
 $templatecontext = [
     'filename' => $filename,
-    'fileurl' => $fileurl,
+    'downloadurl' => $downloadurl->out(false),
     'ext' => strtoupper($ext),
     'showdownload' => !$hidedownload,
     'str_download_original' => get_string('download_original', 'local_docviewer'),

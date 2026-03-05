@@ -140,6 +140,11 @@ class hook_callbacks {
             return;
         }
 
+        // Do not inject interceptor JS when accessed from the Moodle App (or via Teams/webview).
+        if (\core_useragent::is_moodle_app()) {
+            return;
+        }
+
         $supported = self::get_supported_extensions();
         $viewerurl = new \moodle_url('/local/docviewer/view.php');
 

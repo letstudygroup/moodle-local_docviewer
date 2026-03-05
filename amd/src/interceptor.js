@@ -31,6 +31,15 @@ define(['core/ajax'], function(Ajax) {
     var resourceMap = {};
 
     /**
+     * Check if running inside the Moodle App (or its webview, e.g. Teams).
+     *
+     * @returns {boolean} True if the Moodle App is detected.
+     */
+    function isMoodleApp() {
+        return /MoodleMobile/i.test(navigator.userAgent);
+    }
+
+    /**
      * Extract the file extension from a URL.
      *
      * @param {string} url The URL to extract the extension from.
@@ -122,6 +131,11 @@ define(['core/ajax'], function(Ajax) {
 
     return {
         init: function(params) {
+            // Do not intercept links in the Moodle App.
+            if (isMoodleApp()) {
+                return;
+            }
+
             supportedExts = params.extensions || [];
             viewerUrl = params.viewerurl || '';
 
@@ -147,6 +161,10 @@ define(['core/ajax'], function(Ajax) {
         },
 
         initResources: function(params) {
+            if (isMoodleApp()) {
+                return;
+            }
+
             var resources = params.resources || [];
             var vUrl = params.viewerurl || viewerUrl;
 
@@ -201,6 +219,10 @@ define(['core/ajax'], function(Ajax) {
          * @param {object} params The toggle parameters.
          */
         initToggles: function(params) {
+            if (isMoodleApp()) {
+                return;
+            }
+
             var toggles = params.toggles || [];
             var enableLabel = params.enableLabel || 'Enable preview';
             var disableLabel = params.disableLabel || 'Disable preview';

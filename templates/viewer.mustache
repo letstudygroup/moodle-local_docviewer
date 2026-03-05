@@ -21,7 +21,7 @@
 
     Context variables required for this template:
     * filename - The name of the file being viewed.
-    * fileurl - The download URL for the original file.
+    * downloadurl - The URL that force-downloads the original file.
     * ext - The uppercase file extension.
     * showdownload - Whether to show the download button.
     * str_download_original - Localized string for download button.
@@ -31,7 +31,7 @@
     Example context (json):
     {
         "filename": "document.docx",
-        "fileurl": "https://example.com/pluginfile.php/1/mod_resource/content/0/document.docx",
+        "downloadurl": "https://example.com/local/docviewer/view.php?fileurl=...&action=download",
         "ext": "DOCX",
         "showdownload": true,
         "str_download_original": "Download original",
@@ -47,7 +47,7 @@
         </span>
         <div class="docviewer-actions">
             {{#showdownload}}
-            <a href="{{fileurl}}" class="btn btn-primary btn-sm docviewer-download" download>
+            <a href="{{downloadurl}}" class="btn btn-primary btn-sm docviewer-download">
                 <i class="fa fa-download"></i>
                 {{str_download_original}}
                 ({{ext}})
